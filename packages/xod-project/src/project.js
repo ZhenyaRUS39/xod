@@ -698,6 +698,7 @@ export const validatePatchContents = def(
   (patch, project) =>
     checkPatchForDeadNodes(project, patch)
       .chain(checkPatchForDeadLinksAndPins(project))
+      .chain(Patch.validatePinLabels)
       .chain(checkForInvalidBoundValues(project))
       .chain(Patch.validateAbstractPatch)
       .chain(Patch.validateConstructorPatch)

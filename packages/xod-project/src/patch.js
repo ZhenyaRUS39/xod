@@ -481,6 +481,32 @@ export const isTerminalPatch = def(
   R.compose(isTerminalPatchPath, getPatchPath)
 );
 
+// detects clashing pin labels
+export const validatePinLabels = def(
+  'validatePinLabels :: Patch -> Either Error Patch',
+  patch =>
+    R.compose(
+      R.ifElse(
+        R.isEmpty,
+        R.always(Either.of(patch)),
+        R.compose(
+          ([label, pins]) =>
+            fail('CLASHING_PIN_LABELS', {
+              label,
+              pinKeys: R.map(Pin.getPinKey, pins),
+              trace: [getPatchPath(patch)],
+            }),
+          R.head,
+          R.toPairs
+        )
+      ),
+      R.filter(groupedPins => groupedPins.length > 1),
+      R.dissoc(''), // ignore pins with empty labels
+      R.groupBy(Pin.getPinLabel),
+      listPins
+    )(patch)
+);
+
 // =============================================================================
 //
 // Links
